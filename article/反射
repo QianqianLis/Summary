@@ -1,0 +1,149 @@
+
+1. `getClass`返回此对象的运行时类
+```java
+Date date = new Date();
+Class dateClass = date.getClass();
+System.out.println(dateClass.getName());
+```
+输出结果：
+```
+java.util.Date
+```
+
+2. `Class.forName`返回给定字符串名称的类或接口相关联的类对象
+```java
+String className = "java.util.Date";
+Class rDate = null;
+try {
+    rDate = Class.forName(className);
+    System.out.println(rDate.getName());
+} catch (ClassNotFoundException e) {
+    e.printStackTrace();
+}
+```
+输出结果：
+```
+java.util.Date
+```
+3. 类声明的构造方法
+- `getDeclaredConstructors`返回类声明的所有构造方法
+```java
+Chestnut chestnut = new Chestnut();
+Class nutClass = chestnut.getClass();
+Constructor[] constructors;
+constructors = nutClass.getDeclaredConstructors();
+for (int i = 0; i < constructors.length; i++) {
+    System.out.print(Modifier.toString(constructors[i].getModifiers())  + " 参数：");
+    Class[] paraType = constructors[i].getParameterTypes();
+    for (int j = 0; j < paraType.length; j++) {
+        System.out.print(paraType[j].getName() + " ");
+    }
+    System.out.println();
+}
+```
+输出结果：
+```
+private 参数：int java.lang.String 
+public 参数：java.lang.String
+public 参数：int 
+public 参数：
+```
+- `getDeclaredConstructor`返回类中指定的构造方法
+```java
+//默认无参构造函数
+Constructor defaultConstructor = nutClass.getDeclaredConstructor();
+```
+```java
+//固定参数构造方法
+Class[] paraType = {int.class, String.class};
+Constructor isConstructor = nutClass.getDeclaredConstructor(paraType);
+System.out.print(Modifier.toString(isConstructor.getModifiers()) + " 参数：");
+Class[] type = isConstructor.getParameterTypes();
+for (int i = 0; i < type.length; i++) {
+    System.out.print(paraType[i].getName() + " ");
+}
+System.out.println();
+```
+输出结果：
+```
+private 参数：int java.lang.String
+``` 
+
+4. `newInstance`调用构造方法
+- 私有方法调用，需要设置`setAccessible`
+```java
+Chestnut chestnut = new Chestnut();
+Class nutClass = chestnut.getClass();
+try {
+    //调用公共方法
+    Class[] sType = {String.class};
+    Constructor sConstructor = nutClass.getDeclaredConstructor(sType);
+    sConstructor.newInstance("Happy");
+    //调用私有方法
+    Class[] isType = {int.class, String.class};
+    Constructor isConstructor = nutClass.getDeclaredConstructor(isType);
+    isConstructor.setAccessible(true);
+    isConstructor.newInstance(4,"Happy");
+} catch (Exception e) {
+    e.printStackTrace();
+}
+```
+```java
+public Chestnut(String name) {
+    this.name = name;
+    System.out.println("Chestnut's name is " + name);
+}
+private Chestnut(int num, String name) {
+    this.num = num;
+    this.name = name;
+    System.out.println("There is " + num + " nut, name is " + name);
+}
+```
+输出结果：
+```
+Chestnut's name is Happy
+There is 4 nut, name is Happy
+```
+5. `getDeclaredMethod`、`invoke`调用类的方法
+```java
+Chestnut chestnut = new Chestnut();
+Class nutClass = chestnut.getClass();
+Class[] paraType = {String.class};
+try {
+    //获取方法
+    Method method = nutClass.getDeclaredMethod("printWork", paraType);
+    method.setAccessible(true);
+    Object[] arg = {"Today has no work!"};
+    //执行
+    method.invoke(chestnut, arg);
+} catch (Exception e) {
+    e.printStackTrace();
+}
+```
+```java
+private void printWork(String work){
+        System.out.println(work);
+    }
+```
+输出结果：
+```
+Today has no work!
+```
+6.修改类的私有字段
+```java
+Chestnut chestnut = new Chestnut("Liquors");
+Class nutClass = chestnut.getClass();
+try {
+    Field name = nutClass.getDeclaredField("name");
+    name.setAccessible(true);
+    name.set(chestnut, "Diffey");
+    System.out.println("name is " + name.get(chestnut).toString());
+} catch (Exception e) {
+    e.printStackTrace();
+}
+```
+输出结果：
+```
+Chestnut's name is Liquors
+name is Diffey
+```
